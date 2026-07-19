@@ -1,0 +1,9 @@
+.temperature {
+    box-shadow: var(--shadow);
+    border-radius: var(--border-max);
+    background-color: var(--color-background);
+    box-shadow: var(--shadow-strong);
+    min-width: 15rem;
+    min-height: 15rem;
+    font-family: 'JetBrains Mono';
+}

@@ -1,0 +1,39 @@
+.button {
+    margin-left: 0.5rem;
+    margin-right: 0.5rem;
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+    border-radius: 3rem;
+    border: none;
+    cursor: pointer;
+    background-image: linear-gradient(to right, var(--navbar-dark) 0%, var(--navbar-light) 100%);
+    transition: var(--transition);
+    box-shadow: var(--shadow);
+}
+
+.button:hover {
+    box-shadow: var(--shadow-hover);
+    transform: translateY(-2px);
+}
+
+.button:active {
+    box-shadow: var(--shadow-active);
+    transform: translateY(3px);
+}
+
+.button span {
+    color: var(--color-background);
+    font-family: 'JetBrains Mono';
+    user-select: none;
+    padding: 2rem;
+}
+
+.button svg {
+    color: var(--color-background);
+    margin-right: 0rem;
+}
+
+.button-icon {
+    opacity: 0;
+    display: flex;
+}

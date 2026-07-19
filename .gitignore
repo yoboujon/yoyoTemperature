@@ -1,0 +1,6 @@
+# ---> VSCode
+**/.vscode/**
+**/.cache/**
+
+# ---> env
+**/.env

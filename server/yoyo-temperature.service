@@ -1,0 +1,22 @@
+[Unit]
+Description=Yoyo Temperature UDP Logger
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=root
+Group=root
+WorkingDirectory=/opt/yoyo_temperature
+ExecStart=/opt/yoyo_temperature/yoyo_temperature
+Restart=on-failure
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+NoNewPrivileges=true
+ProtectSystem=strict
+ReadWritePaths=/opt/yoyo_temperature
+ProtectHome=true
+
+[Install]
+WantedBy=multi-user.target
