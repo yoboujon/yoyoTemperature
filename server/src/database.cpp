@@ -52,7 +52,7 @@ void Database::close(void)
 void Database::append(const yoyotemp_packet_t &pkt)
 {
     const int64_t now = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch()).count();
-    const float humidity = pkt.humidity/10.0f;
+    const float humidity = pkt.humidity / 10.0f;
     const float temp = pkt.temp;
 
     sqlite3_bind_int64(insertStmt, 1, now);
@@ -88,6 +88,31 @@ const std::vector<yoyotemp_data_t> &Database::query(const char *str)
 
     sqlite3_finalize(latestStmt);
     return vec;
+}
+
+bool Database::query_bool(const char *str)
+{
+    int rc = sqlite3_prepare_v2(db, str, -1, &latestStmt, nullptr);
+    int ret = 0;
+
+    if (rc != SQLITE_OK)
+    {
+        throw std::runtime_error(sqlite3_errmsg(db));
+    }
+    sqlite3_reset(latestStmt);
+
+    while ((rc = sqlite3_step(latestStmt)) == SQLITE_ROW)
+    {
+        ret = sqlite3_column_int(latestStmt, 0);
+    }
+    if (rc != SQLITE_DONE)
+    {
+        sqlite3_finalize(latestStmt);
+        throw std::runtime_error(std::format("Query failed: {}", sqlite3_errmsg(db)));
+    }
+
+    sqlite3_finalize(latestStmt);
+    return static_cast<bool>(ret);
 }
 
 yoyotemp_data_t Database::get_last(void)
@@ -254,4 +279,19 @@ const std::vector<yoyotemp_data_t> &Database::get_from_to(int64_t from, int64_t 
     if (data.empty())
         throw std::runtime_error("get_from_to: Empty");
     return data;
+}
+
+bool Database::has_from_to(int64_t from, int64_t to)
+{
+    const std::string sql = std::format(R"(
+        SELECT EXISTS(
+            SELECT 1
+            FROM measurements
+            WHERE timestamp >= {}
+              AND timestamp <= {}
+        );
+    )",
+                                        from, to);
+
+    return this->query_bool(sql.c_str());
 }

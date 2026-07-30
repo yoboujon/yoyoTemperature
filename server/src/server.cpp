@@ -74,6 +74,7 @@ void Server::open(void)
     CROW_ROUTE(app, "/today")(std::bind(&Server::get_today, this));
     CROW_ROUTE(app, "/measurements")(std::bind(&Server::get_from_to, this, std::placeholders::_1));
     CROW_ROUTE(app, "/measurements/day/<string>/<string>")(std::bind(&Server::get_day_extremum, this, std::placeholders::_1, std::placeholders::_2));
+    CROW_ROUTE(app, "/measurements/exists/<string>")(std::bind(&Server::get_day_exists, this, std::placeholders::_1));
     CROW_ROUTE(app, "/measurements/day/<string>")(std::bind(&Server::get_day_measurements, this, std::placeholders::_1));
     CROW_ROUTE(app, "/measurements/month/<string>")(std::bind(&Server::get_month_measurements, this, std::placeholders::_1));
     CROW_ROUTE(app, "/measurements/month/<string>/<string>")(std::bind(&Server::get_month_extremum, this, std::placeholders::_1, std::placeholders::_2));
@@ -90,6 +91,11 @@ void Server::run(void)
     app.run();
 }
 
+crow::json::wvalue Server::format_json(bool data)
+{
+    return crow::json::wvalue{{"state", data}};
+}
+
 crow::json::wvalue Server::format_json(const yoyotemp_data_t &data)
 {
     const std::time_t t = static_cast<std::time_t>(data.epoch);
@@ -99,7 +105,7 @@ crow::json::wvalue Server::format_json(const yoyotemp_data_t &data)
 
     return crow::json::wvalue{
         {"epoch", data.epoch},
-        {"data", oss.str()},
+        {"date", oss.str()},
         {"temperature", data.temp},
         {"humidity", data.humidity}};
 }
@@ -185,6 +191,21 @@ crow::response Server::get_from_to(const crow::request &req)
             from_epoch = date_to_epoch(from), to_epoch = date_to_epoch(to, true);
 
         const std::vector<yoyotemp_data_t> &data = db->get_from_to(from_epoch, to_epoch);
+        return format_json(data);
+    }
+    catch (const std::exception &e)
+    {
+        return crow::response(crow::status::INTERNAL_SERVER_ERROR, e.what());
+    }
+}
+
+crow::response Server::get_day_exists(const std::string &day)
+{
+    const int64_t from = date_to_epoch(day), to = date_to_epoch(day, true);
+
+    try
+    {
+        const bool data = db->has_from_to(from, to);
         return format_json(data);
     }
     catch (const std::exception &e)

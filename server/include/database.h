@@ -24,8 +24,13 @@ public:
     const std::vector<yoyotemp_data_t>& get_monthly_max(int64_t from, int64_t to);
     const std::vector<yoyotemp_data_t>& get_monthly_min(int64_t from, int64_t to);
     const std::vector<yoyotemp_data_t>& get_from_to(int64_t from, int64_t to);
+    bool has_from_to(int64_t from, int64_t to);
 private:
+    // Query SQL
     const std::vector<yoyotemp_data_t>& query(const char *str);
+    bool query_bool(const char *str);
+
+    // Max/Min
     yoyotemp_data_t get_day_extremum(int64_t day, bool maximum);
     yoyotemp_data_t get_month_extremum(int64_t month, bool maximum);
     const std::vector<yoyotemp_data_t>& get_monthly_extremum(int64_t from, int64_t to, bool maximum);
