@@ -4,6 +4,9 @@ include(FetchContent)
 
 # Sqlite3
 find_package(SQLite3 REQUIRED)
+if(NOT TARGET SQLite3::SQLite3) # CMake < 4.3
+  add_library(SQLite3::SQLite3 ALIAS SQLite::SQLite3)
+endif()
 
 # CrowCpp
 FetchContent_Declare(

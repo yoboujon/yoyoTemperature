@@ -48,7 +48,7 @@ if(MSVC)
     	target_compile_options(${TARGET} PRIVATE /W3 /WX /DEBUG )
 	endif()
 else()
-	target_compile_options(${TARGET} PRIVATE -Wall -Wextra -Wpedantic -Werror)
+	target_compile_options(${TARGET} PRIVATE -Wall -Wextra -Wpedantic -Werror -Wno-type-limits)
 endif()
 
 # Output folder
