@@ -5,8 +5,8 @@
 
 	import TemperatureWidget from "$lib/components/temperature_widget.svelte";
 	import ChartWidget from "$lib/components/chart_widget.svelte";
-	import * as echarts from "echarts";
-	import { get_stops } from "$lib/gradient.js";
+	import SvgIcon from "@jamescoyle/svelte-icon";
+	import { mdiHomeClock } from "@mdi/js";
 
 	function shiftDate(date, days) {
 		const d = new Date(date);
@@ -66,6 +66,16 @@
 				<div class="flex center">
 					<a class="button" href="/{prev}"><span>&lt; {prev}</span></a
 					>
+					{#if !(new Date(data.date).toDateString() === new Date().toDateString())}
+						<a
+							class="button"
+							href="/{new Date().toISOString().slice(0, 10)}"
+						>
+							<span>
+								<SvgIcon type="mdi" path={mdiHomeClock} />
+							</span>
+						</a>
+					{/if}
 					{#if next != null}
 						<a class="button" href="/{next}"
 							><span>{next} &gt;</span></a
