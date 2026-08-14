@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Gabarito:wght@500;700&family=Urbanist:wght@500;600;900&family=Sometype+Mono:wght@500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Gabarito:wght@400..900&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap');
 
 body,
@@ -250,6 +250,11 @@ h2 {
 
 .flex-bottom {
     margin-top: auto !important;
+}
+
+.flex-fill {
+    flex: 1;
+    display: flex;
 }
 
 .shadow {
