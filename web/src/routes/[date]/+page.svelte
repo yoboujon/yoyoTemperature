@@ -44,6 +44,7 @@
 				outdoor: data.infoclimat.hourly["000HF"].at(-1).temperature,
 				indoor: data.json.now.temperature,
 			},
+			exists: data.json.exists.state
 		};
 	});
 </script>
@@ -64,8 +65,9 @@
 					actualMax={value.actual_max}
 				/>
 				<div class="flex center">
-					<a class="button" href="/{prev}"><span>&lt; {prev}</span></a
-					>
+					{#if value.exists}
+					<a class="button" href="/{prev}"><span>&lt; {prev}</span></a>
+					{/if}
 					{#if !(new Date(data.date).toDateString() === new Date().toDateString())}
 						<a
 							class="button"
