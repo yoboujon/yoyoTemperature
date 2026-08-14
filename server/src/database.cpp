@@ -11,7 +11,7 @@ static inline std::time_t get_actual_day(void)
     tm.tm_hour = 0;
     tm.tm_min = 0;
     tm.tm_sec = 0;
-    return std::mktime(&tm);
+    return timegm(&tm);
 }
 
 static inline int64_t get_midnight(int64_t timestamp)
@@ -23,7 +23,7 @@ static inline int64_t get_midnight(int64_t timestamp)
     tm.tm_min = 0;
     tm.tm_sec = 0;
 
-    return std::mktime(&tm);
+    return timegm(&tm);
 }
 
 Database::Database()
@@ -115,6 +115,33 @@ bool Database::query_bool(const char *str)
     return static_cast<bool>(ret);
 }
 
+const std::vector<yoyotemp_maxmin_t> &Database::query_maxmin(const char *str)
+{
+    vec_maxmin.clear();
+    int rc = sqlite3_prepare_v2(db, str, -1, &latestStmt, nullptr);
+    if (rc != SQLITE_OK)
+    {
+        throw std::runtime_error(sqlite3_errmsg(db));
+    }
+    sqlite3_reset(latestStmt);
+
+    while ((rc = sqlite3_step(latestStmt)) == SQLITE_ROW)
+    {
+        const int64_t timestamp = sqlite3_column_int64(latestStmt, 0);
+        const float max = static_cast<float>(sqlite3_column_double(latestStmt, 1));
+        const float min = static_cast<float>(sqlite3_column_double(latestStmt, 2));
+        vec_maxmin.push_back({timestamp, max, min});
+    }
+    if (rc != SQLITE_DONE)
+    {
+        sqlite3_finalize(latestStmt);
+        throw std::runtime_error(std::format("Query failed: {}", sqlite3_errmsg(db)));
+    }
+
+    sqlite3_finalize(latestStmt);
+    return vec_maxmin;
+}
+
 yoyotemp_data_t Database::get_last(void)
 {
     const char *sql = R"(
@@ -183,43 +210,23 @@ yoyotemp_data_t Database::get_day_min(int64_t day)
     return get_day_extremum(day, false);
 }
 
-const std::vector<yoyotemp_data_t> &Database::get_monthly_extremum(int64_t from, int64_t to, bool maximum)
+const std::vector<yoyotemp_maxmin_t> &Database::get_daily(int64_t from, int64_t to)
 {
-    const std::string sql = std::format(R"(
-        SELECT m.timestamp,
-               m.temperature,
-               m.humidity
-        FROM measurements m
-        JOIN (
-            SELECT strftime('%Y-%m', timestamp, 'unixepoch', 'localtime') AS month,
-                   {}(temperature) AS temp
-            FROM measurements
-            WHERE timestamp >= {}
-              AND timestamp < {}
-            GROUP BY month
-        ) t
-        ON strftime('%Y-%m', m.timestamp, 'unixepoch', 'localtime') = t.month
-       AND m.temperature = t.temp
-        ORDER BY m.timestamp;
+    const auto sql = std::format(R"(
+    SELECT strftime('%s', date(timestamp, 'unixepoch')) AS day_epoch,
+        MAX(temperature) AS max_temperature,
+        MIN(temperature) AS min_temperature
+    FROM measurements
+    WHERE timestamp BETWEEN {} AND {}
+    GROUP BY date(timestamp, 'unixepoch')
+    ORDER BY day_epoch;
     )",
-                                        maximum ? "MAX" : "MIN",
-                                        from,
-                                        to);
+                                 from, to);
+    const auto &data = this->query_maxmin(sql.c_str());
 
-    const std::vector<yoyotemp_data_t> &data = this->query(sql.c_str());
     if (data.empty())
-        throw std::runtime_error("No measurements in requested range.");
+        throw std::runtime_error("get_daily: Empty");
     return data;
-}
-
-const std::vector<yoyotemp_data_t> &Database::get_monthly_max(int64_t from, int64_t to)
-{
-    return get_monthly_extremum(from, to, true);
-}
-
-const std::vector<yoyotemp_data_t> &Database::get_monthly_min(int64_t from, int64_t to)
-{
-    return get_monthly_extremum(from, to, false);
 }
 
 yoyotemp_data_t Database::get_month_extremum(int64_t month, bool maximum)
@@ -227,7 +234,7 @@ yoyotemp_data_t Database::get_month_extremum(int64_t month, bool maximum)
     std::time_t t = static_cast<std::time_t>(month);
     std::tm tm = *std::localtime(&t);
     ++tm.tm_mon;
-    const int64_t next_month = std::mktime(&tm);
+    const int64_t next_month = timegm(&tm);
 
     const auto sql = std::format(R"(
         SELECT timestamp,

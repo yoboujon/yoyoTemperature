@@ -15,7 +15,7 @@ static inline int64_t iso8601_to_epoch(const std::string &date)
     iss >> std::get_time(&tm, "%Y-%m-%dT%H:%M:%S");
     if (iss.fail())
         throw std::runtime_error("Invalid date format (expected yyyy-mm-ddThh:mm:ss)");
-    return static_cast<int64_t>(std::mktime(&tm));
+    return static_cast<int64_t>(timegm(&tm));
 }
 
 static inline int64_t date_to_epoch(const std::string &date, bool max = false)
@@ -31,7 +31,7 @@ static inline int64_t date_to_epoch(const std::string &date, bool max = false)
     tm.tm_hour = max ? 23 : 0;
     tm.tm_min = max ? 59 : 0;
     tm.tm_sec = max ? 60 : 0;
-    return static_cast<int64_t>(std::mktime(&tm));
+    return static_cast<int64_t>(timegm(&tm));
 }
 
 static inline int64_t month_to_epoch(const std::string &date, bool max = false)
@@ -50,9 +50,9 @@ static inline int64_t month_to_epoch(const std::string &date, bool max = false)
     tm.tm_sec = 0;
 
     if (!max)
-        return static_cast<int64_t>(std::mktime(&tm));
+        return static_cast<int64_t>(timegm(&tm));
     ++tm.tm_mon;
-    return static_cast<int64_t>(std::mktime(&tm) - 1);
+    return static_cast<int64_t>(timegm(&tm) - 1);
 }
 
 Server::Server(uint16_t p, Database *d)
@@ -76,6 +76,7 @@ void Server::open(void)
     CROW_ROUTE(app, "/measurements/day/<string>/<string>")(std::bind(&Server::get_day_extremum, this, std::placeholders::_1, std::placeholders::_2));
     CROW_ROUTE(app, "/measurements/exists/<string>")(std::bind(&Server::get_day_exists, this, std::placeholders::_1));
     CROW_ROUTE(app, "/measurements/day/<string>")(std::bind(&Server::get_day_measurements, this, std::placeholders::_1));
+    CROW_ROUTE(app, "/measurements/daily/<string>")(std::bind(&Server::get_daily_extremum, this, std::placeholders::_1));
     CROW_ROUTE(app, "/measurements/month/<string>")(std::bind(&Server::get_month_measurements, this, std::placeholders::_1));
     CROW_ROUTE(app, "/measurements/month/<string>/<string>")(std::bind(&Server::get_month_extremum, this, std::placeholders::_1, std::placeholders::_2));
     app.port(port);
@@ -126,6 +127,31 @@ crow::json::wvalue Server::format_json(const std::vector<yoyotemp_data_t> &data)
         item["date"] = oss.str();
         item["temperature"] = d.temp;
         item["humidity"] = d.humidity;
+
+        list.emplace_back(std::move(item));
+    }
+
+    crow::json::wvalue result;
+    result["measurements"] = std::move(list);
+    return result;
+}
+
+crow::json::wvalue Server::format_json(const std::vector<yoyotemp_maxmin_t>& data)
+{
+    crow::json::wvalue::list list;
+
+    for (const auto &d : data)
+    {
+        const std::time_t t = d.epoch;
+        const std::tm tm = *std::localtime(&t);
+        std::ostringstream oss;
+        oss << std::put_time(&tm, "%Y-%m-%dT%H:%M:%S");
+
+        crow::json::wvalue item;
+        item["epoch"] = d.epoch;
+        item["date"] = oss.str();
+        item["max"] = d.max;
+        item["min"] = d.min;
 
         list.emplace_back(std::move(item));
     }
@@ -245,6 +271,20 @@ crow::response Server::get_day_extremum(const std::string &day, const std::strin
     try
     {
         yoyotemp_data_t data = fun(day_epoch);
+        return format_json(data);
+    }
+    catch (const std::exception &e)
+    {
+        return crow::response(crow::status::INTERNAL_SERVER_ERROR, e.what());
+    }
+}
+
+crow::response Server::get_daily_extremum(const std::string& month)
+{
+    const int64_t from = month_to_epoch(month), to = month_to_epoch(month, true);
+    try
+    {
+        const std::vector<yoyotemp_maxmin_t> &data = this->db->get_daily(from, to);
         return format_json(data);
     }
     catch (const std::exception &e)

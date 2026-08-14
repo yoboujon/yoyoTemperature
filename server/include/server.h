@@ -23,6 +23,7 @@ public:
 private:
     crow::json::wvalue format_json(const yoyotemp_data_t& data);
     crow::json::wvalue format_json(const std::vector<yoyotemp_data_t>& data);
+    crow::json::wvalue format_json(const std::vector<yoyotemp_maxmin_t>& data);
     crow::json::wvalue format_json(bool data);
 
     // Crow pages
@@ -33,6 +34,7 @@ private:
     crow::response get_day_measurements(const std::string& day);
     crow::response get_day_exists(const std::string &day);
     crow::response get_day_extremum(const std::string& day, const std::string& what);
+    crow::response get_daily_extremum(const std::string& month);
     crow::response get_month_measurements(const std::string& month);
     crow::response get_month_extremum(const std::string& month, const std::string& what);
 
