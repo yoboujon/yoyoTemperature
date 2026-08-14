@@ -44,7 +44,8 @@
 				outdoor: data.infoclimat.hourly["000HF"].at(-1).temperature,
 				indoor: data.json.now.temperature,
 			},
-			exists: data.json.exists.state
+			exists: data.json.exists.state,
+			max_min: data.json.max_min.measurements,
 		};
 	});
 </script>
@@ -52,10 +53,10 @@
 {#if data.error}
 	<p class="error">{data.error}</p>
 {:else}
-	<div class="flex-row">
-		{#await pageData}
-			<p>Loading temperatures...</p>
-		{:then value}
+	{#await pageData}
+		<p>Loading temperatures...</p>
+	{:then value}
+		<div class="flex-row">
 			<div class="flex-col section main-widgets chart">
 				<h2>Indoor Temperatures</h2>
 				<ChartWidget
@@ -66,7 +67,9 @@
 				/>
 				<div class="flex center">
 					{#if value.exists}
-					<a class="button" href="/{prev}"><span>&lt; {prev}</span></a>
+						<a class="button" href="/{prev}"
+							><span>&lt; {prev}</span></a
+						>
 					{/if}
 					{#if !(new Date(data.date).toDateString() === new Date().toDateString())}
 						<a
@@ -92,8 +95,26 @@
 					<TemperatureWidget value={value.temperatures_now} />
 				</div>
 			</div>
-		{:catch error}
-			<p>Failed to load temperature: {error.message}</p>
-		{/await}
-	</div>
+		</div>
+		<table>
+			<thead>
+				<tr>
+					<th>Date</th>
+					<th>T°C Min.</th>
+					<th>T°C Max.</th>
+				</tr>
+			</thead>
+			<tbody>
+				{#each value.max_min as mm}
+					<tr>
+						<th>{new Date(mm.date).toISOString().slice(0, 10)}</th>
+						<td>{mm.min.toFixed(1)}°C</td>
+						<td>{mm.max.toFixed(1)}°C</td>
+					</tr>
+				{/each}
+			</tbody>
+		</table>
+	{:catch error}
+		<p>Failed to load temperature: {error.message}</p>
+	{/await}
 {/if}
