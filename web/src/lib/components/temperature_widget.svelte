@@ -1,4 +1,6 @@
 <script>
+    import "$lib/css/temperature.css";
+
     import { onMount } from "svelte";
     import SvgIcon from "@jamescoyle/svelte-icon";
     import { mdiHomeThermometer, mdiSunThermometer } from "@mdi/js";

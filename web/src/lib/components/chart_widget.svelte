@@ -1,11 +1,12 @@
 <script>
-    import { onMount } from "svelte";
+    import { onMount, onDestroy } from "svelte";
     import * as echarts from "echarts";
     import { get_stops } from "$lib/gradient.js";
 
     let { temperatures, max, min, actualMax } = $props();
-	let chartDiv = $state(0);
-	let chart;
+    let chartDiv = $state(0);
+    let chart;
+    let resizeObserver;
 
     $effect(() => {
         // Animating echart
@@ -17,10 +18,6 @@
             tooltip: {
                 trigger: "axis",
                 position: (pt) => [pt[0], "10%"],
-            },
-            title: {
-                left: "center",
-                text: "Indoor Temperature",
             },
             toolbox: {
                 feature: {
@@ -65,7 +62,7 @@
                             get_stops(min, actualMax),
                         ),
                     },
-                    data: temperatures
+                    data: temperatures,
                 },
             ],
             visualMap: {
@@ -82,7 +79,14 @@
                 ],
             },
         });
+        resizeObserver = new ResizeObserver(() => chart.resize());
+        resizeObserver.observe(chartDiv);
+    });
+
+    onDestroy(() => {
+        resizeObserver?.disconnect();
+        chart?.dispose();
     });
 </script>
 
-<div bind:this={chartDiv} style="width: 80dvw; height: 50dvh;"></div>
+<div bind:this={chartDiv} class="flex-fill w-100"></div>

@@ -29,11 +29,11 @@
 	const pageData = $derived.by(() => {
 		if (data.error) return null;
 
-		const temps_epoch = data.json.measurements.map((m) => [
+		const temps_epoch = data.json.day.measurements.map((m) => [
 			m.epoch * 1000,
 			m.temperature,
 		]);
-		const temps = data.json.measurements.map((m) => [m.temperature]);
+		const temps = data.json.day.measurements.map((m) => [m.temperature]);
 		const nextCand = shiftDate(data.date, 1);
 		return {
 			temperatures: temps_epoch,
@@ -42,7 +42,7 @@
 			actual_max: temps.length ? Math.ceil(Math.max(...temps)) : null,
 			temperatures_now: {
 				outdoor: data.infoclimat.hourly["000HF"].at(-1).temperature,
-				indoor: temps.at(-1),
+				indoor: data.json.now.temperature,
 			},
 		};
 	});
@@ -51,28 +51,37 @@
 {#if data.error}
 	<p class="error">{data.error}</p>
 {:else}
-	<div class="flex-col">
-		<div class="flex-row">
-			{#await pageData}
-				<p>Loading temperatures...</p>
-			{:then value}
+	<div class="flex-row">
+		{#await pageData}
+			<p>Loading temperatures...</p>
+		{:then value}
+			<div class="flex-col section main-widgets chart">
+				<h2>Indoor Temperatures</h2>
 				<ChartWidget
 					temperatures={value.temperatures}
 					max={value.max}
 					min={value.min}
 					actualMax={value.actual_max}
 				/>
-				<TemperatureWidget value={value.temperatures_now} />
-			{:catch error}
-				<p>Failed to load temperature: {error.message}</p>
-			{/await}
-		</div>
+				<div class="flex center">
+					<a class="button" href="/{prev}"><span>&lt; {prev}</span></a
+					>
+					{#if next != null}
+						<a class="button" href="/{next}"
+							><span>{next} &gt;</span></a
+						>
+					{/if}
+				</div>
+			</div>
 
-		<div class="flex center">
-			<a class="button" href="/{prev}"><span>&lt; {prev}</span></a>
-			{#if next != null}
-				<a class="button" href="/{next}"><span>{next} &gt;</span></a>
-			{/if}
-		</div>
+			<div class="flex-col flex-fill section align-center main-widgets">
+				<h2>Real-Time Temperature</h2>
+				<div class="flex-fill center">
+					<TemperatureWidget value={value.temperatures_now} />
+				</div>
+			</div>
+		{:catch error}
+			<p>Failed to load temperature: {error.message}</p>
+		{/await}
 	</div>
 {/if}
