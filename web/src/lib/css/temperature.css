@@ -3,15 +3,30 @@
     border-radius: var(--border-max);
     background-color: var(--color-background);
     box-shadow: var(--shadow-strong);
-    width: 15rem;
-    min-height: 15rem;
+    min-width: clamp(10rem, 8.949vw + 4.262rem, 15rem);
+    min-height: clamp(10rem, 8.949vw + 4.262rem, 15rem);
     font-family: 'JetBrains Mono';
 }
 
-.chart {
-    min-width: 70dvw;
+@media screen and (max-height: 700px) {
+    .main-widgets {
+        min-height: 30rem !important;
+    }
+}
+
+@media screen and (max-width: 640px) {
+    .main-widgets {
+        min-height: 35rem !important;
+    }
+    .real-time {
+        min-height: 10rem !important;
+    }
 }
 
 .main-widgets {
     min-height: 75dvh;
+}
+
+.chart {
+    min-width: 70dvw;
 }

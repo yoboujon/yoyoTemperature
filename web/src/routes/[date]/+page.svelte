@@ -56,7 +56,7 @@
 	{#await pageData}
 		<p>Loading temperatures...</p>
 	{:then value}
-		<div class="flex-row">
+		<div class="flex-col-mobile">
 			<div class="flex-col section main-widgets chart">
 				<h2>Indoor Temperatures</h2>
 				<ChartWidget
@@ -88,7 +88,7 @@
 				</div>
 			</div>
 
-			<div class="flex-col flex-fill section align-center main-widgets">
+			<div class="flex-col flex-fill section align-center main-widgets real-time">
 				<h2>Real-Time Temperature</h2>
 				<div class="flex-fill center">
 					<TemperatureWidget value={value.temperatures_now} />
