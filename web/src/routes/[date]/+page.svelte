@@ -66,26 +66,25 @@
 					actualMax={value.actual_max}
 				/>
 				<div class="flex center">
-					{#if value.exists}
-						<a class="button" href="/{prev}"
-							><span>&lt; {prev}</span></a
-						>
-					{/if}
-					{#if !(new Date(data.date).toDateString() === new Date().toDateString())}
-						<a
-							class="button"
-							href="/{new Date().toISOString().slice(0, 10)}"
-						>
-							<span>
-								<SvgIcon type="mdi" path={mdiHomeClock} />
-							</span>
-						</a>
-					{/if}
-					{#if next != null}
-						<a class="button" href="/{next}"
-							><span>{next} &gt;</span></a
-						>
-					{/if}
+					<a
+						class={value.exists ? "button" : "button-disabled"}
+						href="/{value.exists ? prev : data.date}"
+						><span>&lt; {prev}</span>
+					</a>
+					<a
+						class={new Date(data.date).toDateString() ===
+						new Date().toDateString()
+							? "button-disabled"
+							: "button"}
+						href="/{new Date().toISOString().slice(0, 10)}"
+					>
+						<SvgIcon type="mdi" path={mdiHomeClock} />
+					</a>
+					<a
+						class={next != null ? "button" : "button-disabled"}
+						href="/{next}"
+						><span>{next != null ? next : nextCandidate} &gt;</span>
+					</a>
 				</div>
 			</div>
 

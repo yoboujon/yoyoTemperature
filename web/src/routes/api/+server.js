@@ -12,7 +12,11 @@ export async function GET({ url, fetch }) {
 	}
 
 	const d = new Date(from);
-	const str_date = String(d.getDate()).padStart(2, '0') + "-" + String(d.getMonth()+1).padStart(2, '0') + "-" + d.getFullYear();
+	// date-1 because we are checking for lower bounds of the actual date (ie: this date minus one (1) day)
+	const d_minus = new Date(from);
+	d_minus.setDate(d_minus.getDate() - 1);
+
+	const str_date = String(d_minus.getDate()).padStart(2, '0') + "-" + String(d_minus.getMonth()+1).padStart(2, '0') + "-" + d_minus.getFullYear();
 	const str_month = String(d.getMonth()+1).padStart(2, '0') + "-" + d.getFullYear();
 
 	const measurementsUrl = new URL("measurements", BASE_URL);

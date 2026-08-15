@@ -1,14 +1,31 @@
 .button {
+    padding-top: 0.6rem;
+    padding-bottom: 0.6rem;
     margin-left: 0.5rem;
     margin-right: 0.5rem;
-    padding-top: 0.5rem;
-    padding-bottom: 0.5rem;
     border-radius: 3rem;
     border: none;
     cursor: pointer;
     background-image: linear-gradient(to right, var(--navbar-dark) 0%, var(--navbar-light) 100%);
     transition: var(--transition);
     box-shadow: var(--shadow);
+}
+
+.button-disabled {
+    padding-top: 0.6rem;
+    padding-bottom: 0.6rem;
+    margin-left: 0.5rem;
+    margin-right: 0.5rem;
+    border-radius: 3rem;
+    border: none;
+    cursor: not-allowed;
+    background-image: linear-gradient(to right, var(--navbar-dark) 0%, var(--navbar-light) 100%);
+    box-shadow: var(--shadow);
+    opacity: 0.5;
+}
+
+.button:has(svg), .button-disabled:has(svg) {
+  padding: 0;
 }
 
 .button:hover {
@@ -21,16 +38,23 @@
     transform: translateY(3px);
 }
 
-.button span {
+.button span, .button-disabled span {
     color: var(--color-background);
     font-family: 'JetBrains Mono';
     user-select: none;
-    padding: 2rem;
+    margin-left: 1rem;
+    margin-right: 1rem;
+
 }
 
-.button svg {
+.button svg, .button-disabled svg {
     color: var(--color-background);
     margin-right: 0rem;
+    height: 2rem;
+    margin-left: 1rem;
+    margin-right: 1rem;
+    padding-top: 0.2rem;
+    padding-bottom: 0.2rem;
 }
 
 .button-icon {
