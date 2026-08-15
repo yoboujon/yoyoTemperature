@@ -95,24 +95,33 @@
 				</div>
 			</div>
 		</div>
-		<table>
-			<thead>
-				<tr>
-					<th>Date</th>
-					<th>T°C Min.</th>
-					<th>T°C Max.</th>
-				</tr>
-			</thead>
-			<tbody>
-				{#each value.max_min as mm}
-					<tr>
-						<th>{new Date(mm.date).toISOString().slice(0, 10)}</th>
-						<td>{mm.min.toFixed(1)}°C</td>
-						<td>{mm.max.toFixed(1)}°C</td>
-					</tr>
-				{/each}
-			</tbody>
-		</table>
+		<div style="height:5rem;"></div>
+		<div class="w-100 center flex">
+			<div style="width: 80dvw;">
+				<table>
+					<thead>
+						<tr>
+							<th>Date</th>
+							<th>T°C Min.</th>
+							<th>T°C Max.</th>
+						</tr>
+					</thead>
+					<tbody>
+						{#each value.max_min as mm}
+							<tr>
+								<th
+									>{new Date(mm.date)
+										.toISOString()
+										.slice(0, 10)}</th
+								>
+								<td>{mm.min.toFixed(1)}°C</td>
+								<td>{mm.max.toFixed(1)}°C</td>
+							</tr>
+						{/each}
+					</tbody>
+				</table>
+			</div>
+		</div>
 	{:catch error}
 		<p>Failed to load temperature: {error.message}</p>
 	{/await}

@@ -67,6 +67,7 @@ h2 {
     --z-index-on-popup: 4;
 
     --border-min: 0.5rem;
+    --border-mid: 0.75rem;
     --border-max: 2rem;
     --profile-content-width-max: 40rem;
     --profile-content-width-min: 36rem;
@@ -352,4 +353,62 @@ h2 {
 
 .disabled {
     display: none !important;
+}
+
+table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    border-radius: var(--border-mid);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+}
+
+table thead tr:first-child th:first-child {
+    border-top-left-radius: var(--border-mid);
+}
+
+table thead tr:last-child th:first-child {
+    border-bottom-left-radius: var(--border-mid);
+}
+
+table thead tr:first-child th:last-child {
+    border-top-right-radius: var(--border-mid);
+}
+
+table thead tr:last-child th:last-child {
+    border-bottom-right-radius: var(--border-mid);
+}
+
+th {
+    padding: 1rem 2rem;
+}
+
+thead {
+    color: var(--color-background);
+    font-family: "Gabarito";
+    font-size: var(--1-2-rem);
+}
+
+thead th {
+    background-image: linear-gradient(to top, var(--navbar-dark) 0%, var(--navbar-light) 100%);
+}
+
+tbody {
+    color: var(--color-text);
+    font-family: "JetBrains Mono";
+}
+
+tbody th {
+    border-bottom: solid 2px #41354310;
+}
+
+td {
+    padding: 1.5rem 1rem 1.5rem 1rem;
+    border-left: solid 2px #41354310;
+    border-bottom: solid 2px #41354310;
+}
+
+td:first-child {
+    border-left: none;
 }
