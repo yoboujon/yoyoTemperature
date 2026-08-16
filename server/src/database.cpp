@@ -26,6 +26,16 @@ static inline int64_t get_midnight(int64_t timestamp)
     return timegm(&tm);
 }
 
+static inline int64_t get_utc_offset_seconds(int64_t epoch_seconds)
+{
+    using namespace std::chrono;
+    const auto tp = sys_seconds{seconds{epoch_seconds}};
+    const auto* tz = current_zone();
+    const auto info = tz->get_info(tp);
+
+    return info.offset.count();
+}
+
 Database::Database()
 {
 }
@@ -127,10 +137,11 @@ const std::vector<yoyotemp_maxmin_t> &Database::query_maxmin(const char *str)
 
     while ((rc = sqlite3_step(latestStmt)) == SQLITE_ROW)
     {
-        const int64_t timestamp = sqlite3_column_int64(latestStmt, 0);
         const float max = static_cast<float>(sqlite3_column_double(latestStmt, 1));
-        const float min = static_cast<float>(sqlite3_column_double(latestStmt, 2));
-        vec_maxmin.push_back({timestamp, max, min});
+        const int64_t max_epoch = sqlite3_column_int64(latestStmt, 2);
+        const float min = static_cast<float>(sqlite3_column_double(latestStmt, 3));
+        const int64_t min_epoch = sqlite3_column_int64(latestStmt, 4);
+        vec_maxmin.push_back({max, max_epoch, min, min_epoch});
     }
     if (rc != SQLITE_DONE)
     {
@@ -212,16 +223,35 @@ yoyotemp_data_t Database::get_day_min(int64_t day)
 
 const std::vector<yoyotemp_maxmin_t> &Database::get_daily(int64_t from, int64_t to)
 {
+    const int64_t utc_offset = get_utc_offset_seconds(from);
     const auto sql = std::format(R"(
-    SELECT strftime('%s', date(timestamp, 'unixepoch')) AS day_epoch,
-        MAX(temperature) AS max_temperature,
-        MIN(temperature) AS min_temperature
+WITH ranked AS (
+    SELECT
+        timestamp,
+        temperature,
+        date(timestamp + {}, 'unixepoch') AS day,
+        ROW_NUMBER() OVER (
+            PARTITION BY date(timestamp + {}, 'unixepoch')
+            ORDER BY temperature DESC
+        ) AS max_rank,
+        ROW_NUMBER() OVER (
+            PARTITION BY date(timestamp + {}, 'unixepoch')
+            ORDER BY temperature ASC
+        ) AS min_rank
     FROM measurements
     WHERE timestamp BETWEEN {} AND {}
-    GROUP BY date(timestamp, 'unixepoch')
-    ORDER BY day_epoch;
+)
+SELECT
+    day,
+    MAX(CASE WHEN max_rank = 1 THEN temperature END) AS max_temperature,
+    MAX(CASE WHEN max_rank = 1 THEN timestamp END)   AS max_epoch,
+    MAX(CASE WHEN min_rank = 1 THEN temperature END) AS min_temperature,
+    MAX(CASE WHEN min_rank = 1 THEN timestamp END)   AS min_epoch
+FROM ranked
+GROUP BY day
+ORDER BY day;
     )",
-                                 from, to);
+                                 utc_offset, utc_offset, utc_offset, from, to);
     const auto &data = this->query_maxmin(sql.c_str());
 
     if (data.empty())

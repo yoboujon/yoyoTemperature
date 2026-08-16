@@ -15,9 +15,10 @@ typedef struct yoyotemp_data {
 } yoyotemp_data_t;
 
 typedef struct yoyotemp_maxmin {
-    int64_t epoch;
     float max;
+    int64_t max_epoch;
     float min;
+    int64_t min_epoch;
 } yoyotemp_maxmin_t;
 
 #endif // YOYO_TEMP_PACKET

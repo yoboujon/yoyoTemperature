@@ -142,16 +142,11 @@ crow::json::wvalue Server::format_json(const std::vector<yoyotemp_maxmin_t>& dat
 
     for (const auto &d : data)
     {
-        const std::time_t t = d.epoch;
-        const std::tm tm = *std::localtime(&t);
-        std::ostringstream oss;
-        oss << std::put_time(&tm, "%Y-%m-%dT%H:%M:%S");
-
         crow::json::wvalue item;
-        item["epoch"] = d.epoch;
-        item["date"] = oss.str();
         item["max"] = d.max;
+        item["max_epoch"] = d.max_epoch;
         item["min"] = d.min;
+        item["min_epoch"] = d.min_epoch;
 
         list.emplace_back(std::move(item));
     }
