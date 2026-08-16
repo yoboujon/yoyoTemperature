@@ -18,6 +18,7 @@
     .main-widgets {
         min-height: 35rem !important;
     }
+
     .real-time {
         min-height: 10rem !important;
     }
@@ -29,4 +30,69 @@
 
 .chart {
     min-width: 70dvw;
+}
+
+.color-heatmap {
+    position: absolute;
+    height: auto;
+    width: 7px;
+    left: 0px;
+    top: 0px;
+    bottom: 0px;
+}
+
+tbody.maximini th {
+    background-image: linear-gradient(to top, var(--navbar-dark) 0%, var(--navbar-light) 100%);
+    color: var(--color-background);
+    width: 20rem;
+}
+
+tbody.maximini td {
+    text-align: center;
+    border: none;
+    min-width: 8rem;
+}
+
+table tbody.maximini th:first-child {
+    border-radius: var(--border-mid);
+
+}
+
+table.maximini {
+    background-color: #9bc2de;
+}
+
+th.date {
+    width: 20rem;
+}
+
+td.max {
+    background-color: #cda3af;
+    color: var(--palette-red);
+}
+
+td.min {
+    background-color: #9bc2de;
+    color: var(--color-special);
+    z-index: 0;
+}
+
+.maximini b {
+    font-size: var(--1-2-rem);
+}
+
+.maximini th {
+    font-size: var(--1-2-rem);
+}
+
+.maximini i {
+    font-size: var(--0-75-rem);
+}
+
+.table-temperatures span {
+    font-size: var(--1-2-rem);
+}
+
+.table-temperatures i {
+    font-size: var(--0-75-rem) !important;
 }

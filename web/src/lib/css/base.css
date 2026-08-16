@@ -76,6 +76,7 @@ h2 {
     --width-mobile: 875px;
     /*  https://clamp.font-size.app/ 
         min=875px       max=1100px       */
+    --0-75-rem: clamp(0.55rem, -0.2278rem + 1.4222vw, 0.75rem);
     --0-9-rem: clamp(0.7rem, -0.0778rem + 1.4222vw, 0.9rem);
     --1-rem: clamp(0.75rem, -0.2222rem + 1.7778vw, 1rem);
     --1-1-rem: clamp(0.8rem, -0.3667rem + 2.1333vw, 1.1rem);
@@ -202,28 +203,6 @@ h2 {
     margin-bottom: 2rem;
     max-width: var(--content-width);
     text-align: justify;
-}
-
-.section button {
-    padding: 1.6rem;
-    color: var(--color-background);
-    background-image: var(--background-purple-dark);
-    font-family: 'JetBrains Mono';
-    border-radius: 3rem;
-    height: 2.5rem;
-    display: flex;
-    align-items: center;
-    margin-left: 0.5rem;
-    margin-right: 0.5rem;
-    border: none;
-    cursor: pointer;
-    transition: var(--transition);
-    box-shadow: var(--shadow-strong);
-}
-
-.section button:hover {
-    box-shadow: var(--shadow-hover);
-    transform: translateY(-3px);
 }
 
 .content {
@@ -407,6 +386,7 @@ td {
     padding: 1.5rem 1rem 1.5rem 1rem;
     border-left: solid 2px #41354310;
     border-bottom: solid 2px #41354310;
+    position: relative;
 }
 
 td:first-child {
