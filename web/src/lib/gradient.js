@@ -12,7 +12,7 @@ function interpolateColor(c1, c2, t) {
     return c1.map((v, i) => Math.round(v + (c2[i] - v) * t));
 }
 
-function colorAtTemp(temp) {
+export function colorAtTemp(temp) {
     for (let i = 0; i < tempGradient.length - 1; i++) {
         const [t1, c1] = tempGradient[i];
         const [t2, c2] = tempGradient[i + 1];
