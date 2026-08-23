@@ -1,6 +1,7 @@
 #include "server.h"
 
 #include <ctime>
+#include <chrono>
 #include <iomanip>
 #include <sstream>
 #include <functional>
@@ -70,6 +71,7 @@ void Server::open(void)
     app.loglevel(crow::LogLevel::Warning);
     app.signal_clear();
     CROW_ROUTE(app, "/")(std::bind(&Server::index, this));
+    CROW_ROUTE(app, "/timezone")(std::bind(&Server::get_timezone, this));
     CROW_ROUTE(app, "/latest")(std::bind(&Server::get_latest, this));
     CROW_ROUTE(app, "/today")(std::bind(&Server::get_today, this));
     CROW_ROUTE(app, "/measurements")(std::bind(&Server::get_from_to, this, std::placeholders::_1));
@@ -100,7 +102,7 @@ crow::json::wvalue Server::format_json(bool data)
 crow::json::wvalue Server::format_json(const yoyotemp_data_t &data)
 {
     const std::time_t t = static_cast<std::time_t>(data.epoch);
-    const std::tm tm = *std::localtime(&t);
+    const std::tm tm = *std::gmtime(&t);
     std::ostringstream oss;
     oss << std::put_time(&tm, "%Y-%m-%dT%H:%M:%S");
 
@@ -118,7 +120,7 @@ crow::json::wvalue Server::format_json(const std::vector<yoyotemp_data_t> &data)
     for (const auto &d : data)
     {
         const std::time_t t = d.epoch;
-        const std::tm tm = *std::localtime(&t);
+        const std::tm tm = *std::gmtime(&t);
         std::ostringstream oss;
         oss << std::put_time(&tm, "%Y-%m-%dT%H:%M:%S");
 
@@ -169,6 +171,13 @@ crow::response Server::index(void)
     {
         return crow::response(crow::status::INTERNAL_SERVER_ERROR, e.what());
     }
+}
+
+crow::response Server::get_timezone(void)
+{
+    const auto* tz = std::chrono::current_zone();
+    const std::string tz_str = std::string(tz->name());
+    return crow::json::wvalue{{"timezone", tz_str}};
 }
 
 crow::response Server::get_latest(void)

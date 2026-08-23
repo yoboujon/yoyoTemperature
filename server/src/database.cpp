@@ -7,23 +7,23 @@ static inline std::time_t get_actual_day(void)
 {
     auto now = std::chrono::system_clock::now();
     std::time_t t = std::chrono::system_clock::to_time_t(now);
-    std::tm tm = *std::localtime(&t);
+    std::tm tm = *std::gmtime(&t);
     tm.tm_hour = 0;
     tm.tm_min = 0;
     tm.tm_sec = 0;
-    return timegm(&tm);
+    return std::mktime(&tm);
 }
 
 static inline int64_t get_midnight(int64_t timestamp)
 {
     std::time_t t = static_cast<std::time_t>(timestamp);
 
-    std::tm tm = *std::localtime(&t);
+    std::tm tm = *std::gmtime(&t);
     tm.tm_hour = 0;
     tm.tm_min = 0;
     tm.tm_sec = 0;
 
-    return timegm(&tm);
+    return std::mktime(&tm);
 }
 
 static inline int64_t get_utc_offset_seconds(int64_t epoch_seconds)
@@ -262,9 +262,9 @@ ORDER BY day;
 yoyotemp_data_t Database::get_month_extremum(int64_t month, bool maximum)
 {
     std::time_t t = static_cast<std::time_t>(month);
-    std::tm tm = *std::localtime(&t);
+    std::tm tm = *std::gmtime(&t);
     ++tm.tm_mon;
-    const int64_t next_month = timegm(&tm);
+    const int64_t next_month = std::mktime(&tm);
 
     const auto sql = std::format(R"(
         SELECT timestamp,

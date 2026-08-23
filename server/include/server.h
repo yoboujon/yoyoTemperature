@@ -28,6 +28,7 @@ private:
 
     // Crow pages
     crow::response index(void);
+    crow::response get_timezone(void);
     crow::response get_latest(void);
     crow::response get_today(void);
     crow::response get_from_to(const crow::request& req);
