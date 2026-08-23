@@ -3,7 +3,7 @@
     import * as echarts from "echarts";
     import { get_stops } from "$lib/gradient.js";
 
-    let { temperatures, max, min, actualMax } = $props();
+    let { temperatures, max, min, actualMax, timeZone } = $props();
     let chartDiv = $state(0);
     let chart;
     let resizeObserver;
@@ -18,6 +18,23 @@
             tooltip: {
                 trigger: "axis",
                 position: (pt) => [pt[0], "10%"],
+                formatter(params) {
+                    const point = params[0];
+                    const time = new Date(point.value[0]).toLocaleString(
+                        "fr-FR",
+                        {
+                            timeZone: timeZone,
+                            year: "numeric",
+                            month: "2-digit",
+                            day: "2-digit",
+                            hour: "2-digit",
+                            minute: "2-digit",
+                            second: "2-digit",
+                            hour12: false,
+                        },
+                    );
+                    return `${time}<br/>${point.marker} ${point.seriesName}: <b>${point.value[1].toFixed(2)}°C</b>`;
+                },
             },
             toolbox: {
                 feature: {
@@ -33,6 +50,7 @@
                 axisLabel: {
                     formatter(value) {
                         return new Date(value).toLocaleTimeString("fr-FR", {
+                            timeZone: timeZone,
                             hour: "2-digit",
                             minute: "2-digit",
                             hour12: false,
